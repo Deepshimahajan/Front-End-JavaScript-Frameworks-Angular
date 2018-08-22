@@ -1,31 +1,31 @@
-// import { Component, OnInit, Input } from '@angular/core';
 import { Component, OnInit, Input, ViewChild, Inject } from '@angular/core';
-
 import { Params, ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
-
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Comment } from '../shared/comment'
-
 import { DishService } from '../services/dish.service';
 import {Dish} from '../shared/dish'
 import { switchMap } from 'rxjs/operators';
+import { visibility, flyInOut, expand } from '../animations/app.animations';
 
-import {ErrorStateMatcher} from '@angular/material/core';
-import {FormControl, FormGroupDirective, NgForm} from '@angular/forms';
-export class MyErrorStateMatcher implements ErrorStateMatcher {
-  isErrorState(control: FormControl | null, form: FormGroupDirective | NgForm | null): boolean {
-    const isSubmitted = form && form.submitted;
-    return !!(control && control.invalid && (control.dirty || control.touched || isSubmitted));
-  }
-}
 
 
 @Component({
   selector: 'app-dishdetail',
   templateUrl: './dishdetail.component.html',
-  styleUrls: ['./dishdetail.component.scss']
+  styleUrls: ['./dishdetail.component.scss'],
+  host: {
+    '[@flyInOut]': 'true',
+    'style': 'display: block;'
+    },
+    animations: [
+      visibility(),
+      flyInOut(),
+      expand()
+    ]
+
 })
+
 export class DishdetailComponent implements OnInit {
     // @Input()
     @ViewChild('cform') commentFormDirective;
@@ -38,6 +38,7 @@ export class DishdetailComponent implements OnInit {
     dishcopy = null;
     commentForm: FormGroup;
     comment: Comment;
+    visibility = 'shown';
     formErrors = {
       'author': '',
       'comment': ''
@@ -47,21 +48,29 @@ export class DishdetailComponent implements OnInit {
         minlength:'Name must be at least 2 characters long.',
         required:'Name is required.'
       },
+
       comment:{
         required:'Comment is required.'
+      },
+
+      rating:{
+        required:'Rating is required.'
       }
     };
     
-  constructor( private dishservice: DishService,private route: ActivatedRoute, private location: Location,private fb: FormBuilder,
+  constructor( private dishservice: DishService, 
+    private route: ActivatedRoute, private location:Location, 
+    private fb: FormBuilder,
     @Inject('BaseURL') private BaseURL) {
     this.createForm();
-   }
+  }
 
    createForm(){
     this.commentForm = this.fb.group({
       rating: [5],
       comment: ['', [Validators.required]],
-      author: ['', [Validators.required,Validators.minLength(2)]]
+      author: ['', [Validators.required,Validators.minLength(2)]],
+      date: new Date().toISOString()
     });
 
     this.commentForm.valueChanges.subscribe(data => this.onValueChanged(data));
@@ -88,15 +97,12 @@ export class DishdetailComponent implements OnInit {
     }
   }
 
-
-
   ngOnInit() {
-    this.route.params
-      .pipe(switchMap((params: Params) => { return this.dishservice.getDish(+params['id']); }))
-      .subscribe(dish => { this.dish = dish; this.dishcopy = dish; this.setPrevNext(dish.id); },
-          errmess => { this.dish = null; this.errMess = <any>errmess; });
-    // const id = +this.route.snapshot.params['id'];
-    // this.dishservice.getDish(id).subscribe(idish => this.dish=idish);
+    this.dishservice.getDishIds().subscribe(dishIds => this.dishIds = dishIds);
+    this.route.params.pipe(switchMap((params: Params) => { this.visibility = 'hidden'; return this.dishservice.getDish(+params['id']); }))
+    .subscribe(dish => { this.dish = dish; this.dishcopy = dish; this.setPrevNext(dish.id); this.visibility = 'shown'; },
+      errmess => this.errMess = <any>errmess);
+    
   }
 
   setPrevNext(dishId: number) {
@@ -114,7 +120,10 @@ export class DishdetailComponent implements OnInit {
     this.comment.date = new Date().toISOString();
     console.log(this.comment);
     
-    this.dish.comments.push(this.comment);
+    this.dishcopy.comments.push(this.comment);
+    this.dishcopy.save()
+      .subscribe(dish => { this.dish = dish; console.log(this.dish); });
+      
     this.commentForm.reset({
       author: '',
       rating: '5',
@@ -125,7 +134,5 @@ export class DishdetailComponent implements OnInit {
     this.commentFormDirective.resetForm();
     console.log(this.commentFormDirective.form.controls.rating.setValue(5));
   }
-
-  matcher = new MyErrorStateMatcher();
 
 }
