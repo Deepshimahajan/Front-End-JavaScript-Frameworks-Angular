@@ -28,16 +28,16 @@ export class MyErrorStateMatcher implements ErrorStateMatcher {
 })
 export class DishdetailComponent implements OnInit {
     // @Input()
-    @ViewChild('cform') feedbackFormDirective;
+    @ViewChild('cform') commentFormDirective;
     dish: Dish;
     dishIds: number[];
     prev: number;
     next: number;
     errMess: string;
     dishErrMess: string;
-
+    dishcopy = null;
     commentForm: FormGroup;
-    newcomment: Comment;
+    comment: Comment;
     formErrors = {
       'author': '',
       'comment': ''
@@ -91,10 +91,10 @@ export class DishdetailComponent implements OnInit {
 
 
   ngOnInit() {
-    this.dishservice.getDishIds().subscribe(dishIds => this.dishIds = dishIds);
-    this.route.params.pipe(switchMap((params: Params) => this.dishservice.getDish(+params['id'])))
-    .subscribe(dish => { this.dish = dish; this.setPrevNext(dish.id); },
-    errmess => this.dishErrMess = <any>errmess.message);
+    this.route.params
+      .pipe(switchMap((params: Params) => { return this.dishservice.getDish(+params['id']); }))
+      .subscribe(dish => { this.dish = dish; this.dishcopy = dish; this.setPrevNext(dish.id); },
+          errmess => { this.dish = null; this.errMess = <any>errmess; });
     // const id = +this.route.snapshot.params['id'];
     // this.dishservice.getDish(id).subscribe(idish => this.dish=idish);
   }
@@ -110,13 +110,20 @@ export class DishdetailComponent implements OnInit {
   }
 
   onSubmit() {
-    this.newcomment = this.commentForm.value;
-    const date: Date = new Date();
-    this.newcomment.date = date.toString();
-    console.log(this.newcomment);
-    this.commentForm.reset();
-    this.feedbackFormDirective.resetForm({rating:5,author:'',comment:''});
-    this.dish.comments.push(this.newcomment);
+    this.comment = this.commentForm.value;
+    this.comment.date = new Date().toISOString();
+    console.log(this.comment);
+    
+    this.dish.comments.push(this.comment);
+    this.commentForm.reset({
+      author: '',
+      rating: '5',
+      comment: ''
+    });
+
+    
+    this.commentFormDirective.resetForm();
+    console.log(this.commentFormDirective.form.controls.rating.setValue(5));
   }
 
   matcher = new MyErrorStateMatcher();
