@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { LEADERS } from '../shared/leaders';
 import { Leader } from '../shared/leader';
-import { removeListener } from 'cluster';
 import { Observable, of } from 'rxjs';
 import { delay } from 'rxjs/operators';
 
@@ -18,6 +17,11 @@ export class LeaderService {
   getLeaders(): Observable<Leader[]> {
     return of(LEADERS).pipe(delay(2000));
 
+  }
+
+  getLeader(id: number): Observable<Leader> {
+    return of(LEADERS.filter((leader) => (leader.id === id))[0]).pipe(delay(2000));
+  
   }
 
 
