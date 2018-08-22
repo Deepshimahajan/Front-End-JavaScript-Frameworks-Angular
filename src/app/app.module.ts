@@ -38,6 +38,8 @@ import { baseURL } from './shared/baseurl';
 import { LeaderService } from './services/leader.service';
 import { HttpClientModule } from '@angular/common/http';
 import { ProcessHTTPMsgService } from './services/process-httpmsg.service';
+import { RestangularModule, Restangular } from 'ngx-restangular';
+import { RestangularConfigFactory } from './shared/restConfig';
 
 @NgModule({
   declarations: [
@@ -72,7 +74,8 @@ import { ProcessHTTPMsgService } from './services/process-httpmsg.service';
     MatSliderModule,
     MatProgressSpinnerModule,
     ReactiveFormsModule,
-    HttpClientModule 
+    HttpClientModule,
+    RestangularModule.forRoot(RestangularConfigFactory)
   ],
   providers: [DishService,
     PromotionService, 
