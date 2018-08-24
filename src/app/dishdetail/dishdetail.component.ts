@@ -18,6 +18,7 @@ import { visibility, flyInOut, expand } from '../animations/app.animations';
     '[@flyInOut]': 'true',
     'style': 'display: block;'
     },
+    
     animations: [
       visibility(),
       flyInOut(),
@@ -59,7 +60,7 @@ export class DishdetailComponent implements OnInit {
     };
     
   constructor( private dishservice: DishService, 
-    private route: ActivatedRoute, private location:Location, 
+    private route: ActivatedRoute, private location: Location, 
     private fb: FormBuilder,
     @Inject('BaseURL') private BaseURL) {
     this.createForm();

@@ -36,8 +36,24 @@
     </div>
   </div>
 
+  <div *ngIf = "submitting">
+      <h4>Submitting Form...</h4>
+      <mat-spinner></mat-spinner>
+    </div>
+    
+    <div *ngIf = "previewing" [@expand]>
+      <h3>Your Submission</h3>
+      <p>First Name: {{ feedbackForm.value.firstname }}</p>
+      <p>Last Name: {{ feedbackForm.value.lastname }}</p>
+      <p>Tel. Number: {{ feedbackForm.value.telnum }}</p>
+      <p>Email: {{ feedbackForm.value.email }}</p>
+      <p>Contact You?: {{ feedbackForm.value.agree }}</p>
+      <p>How: {{ feedbackForm.value.contacttype }}</p>
+      <p>Feedback: {{ feedbackForm.value.message }}</p>
+    </div>
+    
+   <div *ngIf = "!(previewing || submitting)" fxFlex fxFlexOffset="20px" class="form-size" >
 
-  <div fxFlex fxFlexOffset="20px" class="form-size">
     <h3>Send us your Feedback</h3>
     
 
@@ -81,5 +97,11 @@
       </p>
       <button type="submit" mat-button class="background-primary text-floral-white">Submit</button>
     </form>
+
+    <mat-card *ngIf="errMess">
+        <h2>Error</h2>
+        <h4>{{errMess}}</h4>
+    </mat-card>
+
   </div>
 </div>
